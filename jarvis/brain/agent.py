@@ -27,9 +27,16 @@ class Agent:
         self.enable_fallback = enable_fallback
         self.registry = get_registry()
 
-        # Load tools
-        self.tools = get_openai_tools()
+        # Load tools (lazy)
+        self._tools: Optional[list[dict]] = None
         self._supports_native_tools = True  # akan di-detect di runtime
+
+    @property
+    def tools(self) -> list[dict]:
+        """Lazy load tools."""
+        if self._tools is None:
+            self._tools = get_openai_tools()
+        return self._tools
 
     def _build_messages(self, user_message: str, history: Optional[list[dict]] = None) -> list[dict]:
         """Bangun messages untuk LLM."""
@@ -44,27 +51,90 @@ class Agent:
     def _try_parse_json_tool_call(self, content: str) -> Optional[dict]:
         """
         Coba parse tool call dari konten teks (fallback mode).
-        Format: {"tool": "nama", "args": {...}}
+        Support formats:
+        - {"tool": "nama", "args": {...}}  (our fallback format)
+        - {"name": "nama", "arguments": {...}}  (OpenAI native format as text)
         """
         if not content:
             return None
 
-        # Cari JSON di dalam konten
-        patterns = [
-            r'\{[^{}]*"tool"\s*:\s*"[^"]+"[^{}]*\}',  # simple JSON
-            r'```json\s*(\{.*?\})\s*```',  # markdown code block
-            r'```\s*(\{.*?\})\s*```',  # generic code block
+        # Coba extract JSON dari markdown code blocks dulu
+        code_block_patterns = [
+            r'```json\s*(\{.*?\})\s*```',
+            r'```\s*(\{.*?\})\s*```',
         ]
-
-        for pattern in patterns:
+        for pattern in code_block_patterns:
             matches = re.findall(pattern, content, re.DOTALL)
             for match in matches:
                 try:
                     parsed = json.loads(match)
-                    if "tool" in parsed and "args" in parsed:
+                    if self._normalize_tool_call(parsed):
                         return parsed
                 except json.JSONDecodeError:
                     continue
+
+        # Cari JSON object dengan nested braces (stack-based)
+        # Find first { and find matching }
+        start = content.find('{"tool"')
+        if start == -1:
+            start = content.find('{ "tool"')
+        if start == -1:
+            start = content.find('{"name"')
+        if start == -1:
+            start = content.find('{ "name"')
+        if start == -1:
+            return None
+
+        # Stack-based brace matching
+        brace_count = 0
+        in_string = False
+        escape_next = False
+        end = -1
+
+        for i, char in enumerate(content[start:], start=start):
+            if escape_next:
+                escape_next = False
+                continue
+            if char == '\\' and in_string:
+                escape_next = True
+                continue
+            if char == '"' and not escape_next:
+                in_string = not in_string
+                continue
+            if not in_string:
+                if char == '{':
+                    brace_count += 1
+                elif char == '}':
+                    brace_count -= 1
+                    if brace_count == 0:
+                        end = i + 1
+                        break
+
+        if end > start:
+            json_str = content[start:end]
+            try:
+                parsed = json.loads(json_str)
+                normalized = self._normalize_tool_call(parsed)
+                if normalized:
+                    return normalized
+            except json.JSONDecodeError:
+                pass
+
+        return None
+
+    def _normalize_tool_call(self, parsed: dict) -> Optional[dict]:
+        """Normalize various tool call formats to our standard: {tool, args}."""
+        # Format 1: {"tool": "name", "args": {...}}
+        if "tool" in parsed and "args" in parsed:
+            return {"tool": parsed["tool"], "args": parsed["args"]}
+
+        # Format 2: {"tool": "name", "parameters": {...}} (some models)
+        if "tool" in parsed and "parameters" in parsed:
+            return {"tool": parsed["tool"], "args": parsed["parameters"]}
+
+        # Format 3: {"name": "name", "arguments": {...}} (OpenAI native as text)
+        if "name" in parsed and "arguments" in parsed:
+            return {"tool": parsed["name"], "args": parsed["arguments"]}
 
         return None
 
@@ -92,12 +162,29 @@ class Agent:
 
     async def _execute_fallback_tool(self, tool_name: str, args: dict) -> str:
         """Eksekusi tool untuk fallback mode."""
+        # Map parameter names from model to tool signature
+        mapped_args = self._map_tool_params(tool_name, args)
         try:
-            result = self.registry.call(tool_name, args)
+            result = self.registry.call(tool_name, mapped_args)
             return str(result)
         except Exception as e:
             logger.error(f"Fallback tool '{tool_name}' error: {e}")
             return f"Error: {e}"
+
+    def _map_tool_params(self, tool_name: str, args: dict) -> dict:
+        """Map parameter names from model output to tool signature."""
+        # Common mappings for known tools
+        param_mappings = {
+            "set_volume": {"volume": "level"},
+            "open_app": {"app": "app_name"},
+        }
+
+        mapping = param_mappings.get(tool_name, {})
+        mapped = {}
+        for k, v in args.items():
+            mapped_key = mapping.get(k, k)
+            mapped[mapped_key] = v
+        return mapped
 
     async def run(self, user_message: str, history: Optional[list[dict]] = None) -> str:
         """
@@ -263,3 +350,9 @@ def get_agent() -> Agent:
     if _agent is None:
         _agent = Agent()
     return _agent
+
+
+def reset_agent() -> None:
+    """Reset global agent (forces reload of tools)."""
+    global _agent
+    _agent = None
