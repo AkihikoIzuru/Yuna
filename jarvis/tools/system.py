@@ -71,14 +71,18 @@ def open_app(app_name: str) -> str:
 
     # Mapping common app names
     app_map = {
-        "kalkulator": "calc" if is_windows else "gnome-calculator",
-        "calculator": "calc" if is_windows else "gnome-calculator",
-        "notepad": "notepad" if is_windows else "gedit",
-        "chrome": "chrome" if is_windows else "google-chrome",
+        "kalkulator": "calc",
+        "calculator": "calc",
+        "notepad": "notepad",
+        "chrome": "chrome",
         "firefox": "firefox",
-        "edge": "msedge" if is_windows else "microsoft-edge",
+        "edge": "msedge",
         "vscode": "code",
         "code": "code",
+        "cmd": "cmd",
+        "terminal": "cmd",
+        "explorer": "explorer",
+        "file explorer": "explorer",
     }
 
     app_name_lower = app_name.lower()
@@ -86,14 +90,15 @@ def open_app(app_name: str) -> str:
 
     try:
         if is_windows:
-            subprocess.Popen(["start", executable], shell=True)
+            # Windows: gunakan start untuk GUI apps
+            subprocess.Popen(["start", "", executable], shell=True)
         else:
             subprocess.Popen([executable], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
         return f"Aplikasi '{app_name}' berhasil dibuka."
     except Exception as e:
         logger.error(f"Gagal buka aplikasi '{app_name}': {e}")
-        return f"Gagal buka aplikasi '{app_name}'. Coba pastikan nama aplikasi benar."
+        return f"Gagal buka aplikasi '{app_name}'. Coba pastikan nama aplikasi benar atau aplikasi sudah terinstall."
 
 
 @tool(risk="medium")
@@ -109,13 +114,34 @@ def set_volume(level: int) -> str:
 
     try:
         if is_windows:
-            # Windows: pakai nircmd atau PowerShell
-            # Untuk Fase 1, kita skip implementasi penuh (butuh nircmd.exe)
-            return f"Volume set ke {level}% (implementasi Windows sederhana: butuh nircmd)"
+            # Windows: coba nircmd dulu (value 0-65535)
+            try:
+                subprocess.run(["nircmd", "setsysvolume", str(int(level * 655.35))],
+                             check=True, capture_output=True, timeout=3)
+                return f"Volume diset ke {level}%."
+            except FileNotFoundError:
+                pass
+
+            # Fallback: pycaw (Python library untuk Core Audio API)
+            try:
+                from ctypes import cast, POINTER
+                from comtypes import CLSCTX_ALL
+                from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
+
+                devices = AudioUtilities.GetSpeakers()
+                interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+                volume = cast(interface, POINTER(IAudioEndpointVolume))
+                volume.SetMasterVolumeLevelScalar(level / 100.0, None)
+                return f"Volume diset ke {level}%."
+            except ImportError:
+                pass
+
+            # Fallback 2: Windows native - tidak butuh external tool, tapi terbatas
+            return f"Volume target: {level}% (Windows: instal nircmd dari nirsoft.net atau pip install pycaw untuk kontrol penuh)."
         else:
             # Linux: pakai amixer atau pactl
             subprocess.run(["amixer", "set", "Master", f"{level}%"], check=True)
-            return f"Volume set ke {level}%."
+            return f"Volume diset ke {level}%."
     except Exception as e:
         logger.error(f"Gagal set volume: {e}")
         return f"Gagal set volume. Error: {e}"
