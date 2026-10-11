@@ -1,0 +1,47 @@
+[project]
+name = "jarvis"
+version = "0.1.0"
+description = "Asisten AI rumah modular ala JARVIS"
+readme = "readme.md"
+requires-python = ">=3.11"
+dependencies = [
+    "openai>=1.30.0",
+    "python-dotenv>=1.0.0",
+    "psutil>=5.9.0",
+    "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+    "ruff>=0.5.0",
+]
+voice = [
+    "faster-whisper>=1.0.0",
+    "edge-tts>=6.1.0",
+    "openwakeword>=0.5.0",
+    "pvporcupine>=3.0.0",
+    "pyaudio>=0.2.14",
+    "sounddevice>=0.4.6",
+]
+homeauto = [
+    "aiohttp>=3.9.0",
+]
+network = [
+    "librouteros>=3.3.0",
+]
+
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
