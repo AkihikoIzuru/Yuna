@@ -234,6 +234,44 @@
             box-shadow: 0 0 60px rgba(255, 0, 68, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.1);
         }
 
+        /* Expressive Orb States (Fase 9) */
+        .orb-happy .orb-core {
+            background: radial-gradient(circle at 30% 30%, #ff6b9d, #ff9fd6);
+            box-shadow: 0 0 60px rgba(255, 107, 157, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.1);
+            animation: orbHappy 1.5s ease-in-out infinite;
+        }
+
+        @keyframes orbHappy {
+            0%, 100% { transform: scale(1) translateY(0); }
+            25% { transform: scale(1.1) translateY(-5px); }
+            50% { transform: scale(1.05) translateY(0); }
+            75% { transform: scale(1.1) translateY(-3px); }
+        }
+
+        .orb-sleepy .orb-core {
+            background: radial-gradient(circle at 30% 30%, #6b8eff, #a5bfff);
+            box-shadow: 0 0 40px rgba(107, 142, 255, 0.4), inset 0 0 30px rgba(255, 255, 255, 0.1);
+            animation: orbSleepy 3s ease-in-out infinite;
+        }
+
+        @keyframes orbSleepy {
+            0%, 100% { transform: scale(1) translateY(0); opacity: 0.7; }
+            50% { transform: scale(1.02) translateY(2px); opacity: 0.5; }
+        }
+
+        .orb-curious .orb-core {
+            background: radial-gradient(circle at 30% 30%, #ffaa00, #ffcc44);
+            box-shadow: 0 0 60px rgba(255, 170, 0, 0.6), inset 0 0 30px rgba(255, 255, 255, 0.1);
+            animation: orbCurious 0.8s ease-in-out infinite;
+        }
+
+        @keyframes orbCurious {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.08) rotate(-8deg); }
+            50% { transform: scale(1) rotate(0deg); }
+            75% { transform: scale(1.08) rotate(8deg); }
+        }
+
         .orb-status {
             margin-top: 20px;
             font-family: 'Orbitron', sans-serif;
@@ -752,7 +790,10 @@
             'listening': { class: 'orb-listening', label: 'LISTENING' },
             'thinking': { class: 'orb-thinking', label: 'THINKING' },
             'speaking': { class: 'orb-speaking', label: 'SPEAKING' },
-            'error': { class: 'orb-error', label: 'ERROR' }
+            'error': { class: 'orb-error', label: 'ERROR' },
+            'happy': { class: 'orb-happy', label: 'HAPPY' },
+            'sleepy': { class: 'orb-sleepy', label: 'SLEEPY' },
+            'curious': { class: 'orb-curious', label: 'CURIOUS' }
         };
 
         // Connect WebSocket
@@ -822,6 +863,12 @@
                 case 'home_status':
                     updateHomeStatus(data);
                     break;
+                case 'mood_change':
+                    updateMood(data.mood);
+                    break;
+                case 'proactive_greeting':
+                    showProactiveGreeting(data.message);
+                    break;
             }
         }
 
@@ -850,6 +897,36 @@
 
             // Update status indicators
             updateStatusIndicators(data.status);
+
+            // Update mood if provided
+            if (data.mood) {
+                updateMood(data.mood);
+            }
+        }
+
+        function updateMood(mood) {
+            const orb = document.getElementById('orb');
+            const orbStatus = document.getElementById('orbStatus');
+
+            // For expressive moods, override the status class
+            if (mood === 'happy' || mood === 'sleepy' || mood === 'curious') {
+                // Remove other state classes but keep base
+                orb.className = 'orb';
+                orb.classList.add(statusMap[mood].class);
+                orbStatus.textContent = statusMap[mood].label;
+            }
+        }
+
+        function showProactiveGreeting(message) {
+            const transcriptContent = document.getElementById('transcriptContent');
+            const div = document.createElement('div');
+            div.className = 'message message-assistant';
+            div.innerHTML = `
+                <div class="message-role">Yuna (Proaktif)</div>
+                <div class="message-text">${escapeHtml(message)}</div>
+            `;
+            transcriptContent.appendChild(div);
+            transcriptContent.scrollTop = transcriptContent.scrollHeight;
         }
 
         function updateStatusIndicators(status) {

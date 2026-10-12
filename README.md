@@ -8,7 +8,7 @@
 
 [![Python](https://img.shields.io/badge/Python-3.11+-blue?logo=python)](https://python.org)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-0078d6?logo=windows)](https://microsoft.com/windows)
-[![Fase](https://img.shields.io/badge/Fase-8%20Polishing-brightgreen)](https://github.com/AkihikoIzuru/Yuna)
+[![Fase](https://img.shields.io/badge/Fase-9%20Terasa%20Hidup-yellow)](https://github.com/AkihikoIzuru/Yuna)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 
 [📖 Story](STORY.md) · [🤝 Contributing](CONTRIBUTING.md) · [📄 License](LICENSE)
@@ -43,7 +43,7 @@ Yuna *terasa* hidup karena: persona orisinal, memori jangka panjang, sapaan proa
 ║  Memory:    SQLite (%APPDATA%\Yuna\yuna.db)              ║
 ║  Network:   MikroTik RB951Ui-2HnD (read-only, API 8728)  ║
 ║  Home:      Home Assistant REST + MQTT (ESP32)           ║
-║  Fase:      8 (Polishing) ✅                             ║
+║  Fase:      9 (Terasa Hidup) 🔧                          ║
 ╚══════════════════════════════════════════════════════════╝
 ```
 
@@ -57,14 +57,14 @@ Yuna *terasa* hidup karena: persona orisinal, memori jangka panjang, sapaan proa
 | 0B | Cleanup proyek | ✅ | Hapus file lama, pre-commit hook, satu README |
 | D | Dokumentasi & GitHub | ✅ | README, LICENSE, CONTRIBUTING, STORY, push |
 | 1 | Otak + Tool (teks) | ✅ | REPL, 8 tools dasar, fallback JSON, retry model |
-| 2 | Suara (Wake word utama) | 🔧 | faster-whisper STT, edge-tts TTS, multi-backend wake |
+| 2 | Suara (Wake word utama) | ✅ | faster-whisper STT, edge-tts TTS, multi-backend wake |
 | 3 | Memori & Personalisasi | ✅ | SQLite, fakta user, reminder TTS, 8 memory tools |
 | 4 | Jaringan & Rumah | ✅ | MikroTik read-only, Home Assistant, MQTT, alert |
 | 5 | Keamanan & Konfirmasi | ✅ | Risk tier, konfirmasi eksplisit, audit log, allowlist |
 | 6 | Dashboard (Web UI) | ✅ | FastAPI + WS, orb visualizer, transcript real-time |
 | 7 | Desktop App + Tray | ✅ | pywebview, pystray, single instance, hotkey, notif |
 | 8 | Polishing | ✅ | Health check, logging rotation, PyInstaller packaging |
-| 9 | Terasa Hidup | 🔜 | Streaming LLM+TTS, proaktif, avatar ekspresif, vision |
+| 9 | Terasa Hidup | 🔧 | Streaming LLM+TTS, proaktif, avatar ekspresif, vision |
 | 10 | Yuna Hidup di PC | 🔜 | Sandbox coding, jurnal, path-jail, otonomi terbatas |
 
 > ✅ = jalan & teruji · 🔧 = dikerjakan · 🔜 = rencana
@@ -338,7 +338,7 @@ from yuna.tools import system, memory, home, web  # baru
 - [x] Fase 0B: Cleanup + pre-commit hook
 - [x] Fase D: Dokumentasi (README, LICENSE, CONTRIBUTING, STORY)
 - [x] Fase 1: Otak + Tool (teks) — perbaikan registry, EOFError, persona
-- [ ] Fase 2: Suara (wake word utama, STT+TTS streaming, barge-in)
+- [x] Fase 2: Suara (wake word utama, STT+TTS streaming, barge-in)
 - [x] Fase 3: Memori & Personalisasi
 - [x] Fase 4: Jaringan MikroTik (read-only) + Home Assistant
 - [x] Fase 5: Keamanan & Konfirmasi

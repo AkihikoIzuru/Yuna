@@ -54,13 +54,14 @@ class ConnectionManager:
 
 class StatusData(BaseModel):
     """Current status data."""
-    status: str = "idle"  # idle, listening, thinking, speaking, error
+    status: str = "idle"  # idle, listening, thinking, speaking, error, happy, sleepy, curious
     transcript: str = ""
     last_tool: Optional[str] = None
     last_tool_result: Optional[str] = None
     network_status: Dict[str, Any] = {}
     home_status: Dict[str, Any] = {}
     timestamp: str = ""
+    mood: str = "idle"  # idle, happy, sleepy, curious, thinking
 
 
 # Global instances
@@ -69,7 +70,7 @@ current_status = StatusData()
 _event_queue: asyncio.Queue = asyncio.Queue()
 
 
-def set_status(status: str, transcript: str = "", tool: str = None, tool_result: str = None):
+def set_status(status: str, transcript: str = "", tool: str = None, tool_result: str = None, mood: str = None):
     """Update current status and broadcast to clients."""
     global current_status
     current_status.status = status
@@ -79,6 +80,8 @@ def set_status(status: str, transcript: str = "", tool: str = None, tool_result:
         current_status.last_tool = tool
     if tool_result:
         current_status.last_tool_result = tool_result
+    if mood:
+        current_status.mood = mood
     current_status.timestamp = datetime.now().isoformat()
 
     # Broadcast to all clients
@@ -301,6 +304,23 @@ def notify_network_status(status: dict):
 def notify_home_status(status: dict):
     """Notify home status."""
     asyncio.create_task(broadcast_home_status(status))
+
+
+# Proactive/Mood notifications
+def notify_mood_change(mood: str):
+    """Notify mood change for expressive orb."""
+    asyncio.create_task(manager.broadcast({
+        "type": "mood_change",
+        "data": {"mood": mood, "timestamp": datetime.now().isoformat()},
+    }))
+
+
+def notify_proactive_greeting(message: str):
+    """Notify proactive greeting from Yuna."""
+    asyncio.create_task(manager.broadcast({
+        "type": "proactive_greeting",
+        "data": {"message": message, "timestamp": datetime.now().isoformat()},
+    }))
 
 
 # Helper to run server

@@ -328,29 +328,35 @@ class VoiceLoop:
 
             print(f"Anda: {text}")
 
-            # Agent with history
-            response = await self.agent.run(text, history=self._history)
+            # Agent with history - STREAMING mode for first-token latency
+            self._is_speaking = True
+            tts_start = time.time()
+
+            # Collect streaming response and play TTS as chunks arrive
+            full_response = ""
+            async for chunk in self.agent.run_stream(text, history=self._history):
+                full_response += chunk
+                # For streaming TTS, we'd ideally stream audio too
+                # For now, collect full response then speak
 
             stt_time = time.time() - start_time
 
             # Save to DB
             self.conversation_history.add_message("user", text)
-            self.conversation_history.add_message("assistant", response)
+            self.conversation_history.add_message("assistant", full_response)
 
             # Update in-memory history
             self._history.append({"role": "user", "content": text})
-            self._history.append({"role": "assistant", "content": response})
+            self._history.append({"role": "assistant", "content": full_response})
 
             # Keep history limited
             if len(self._history) > 20:
                 self._history = self._history[-20:]
 
             # TTS + Play
-            print(f"yuna: {response}")
+            print(f"yuna: {full_response}")
 
-            tts_start = time.time()
-            self._is_speaking = True
-            self._tts_task = asyncio.create_task(self.tts.speak_stream_and_play(response))
+            self._tts_task = asyncio.create_task(self.tts.speak_stream_and_play(full_response))
             await self._tts_task
             self._is_speaking = False
             tts_time = time.time() - tts_start

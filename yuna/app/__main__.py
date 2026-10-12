@@ -19,6 +19,7 @@ from yuna.brain.agent import get_agent
 from yuna.memory import ConversationHistory, ReminderManager
 from yuna.ui.server import app as ui_app, notify_status_change, notify_transcript, notify_tool_call, notify_tool_result
 from yuna.voice.loop import run_voice_loop
+from yuna.proactive import get_proactive_engine
 
 # Setup logging
 logging.basicConfig(
@@ -43,6 +44,9 @@ class YunaApp:
         self._running = False
         self._muted = False
         self._wake_mode = True
+
+        # Proactive behavior engine
+        self.proactive = get_proactive_engine(cooldown_minutes=10, quiet_hours=(22, 7))
 
     def setup_callbacks(self):
         """Setup all callbacks."""
@@ -103,6 +107,20 @@ class YunaApp:
         # Start voice loop in background
         self.voice_thread = threading.Thread(target=self._run_voice_loop, daemon=True)
         self.voice_thread.start()
+
+        # Start proactive greeting on startup
+        self._schedule_proactive_greeting()
+
+    def _schedule_proactive_greeting(self):
+        """Schedule a proactive greeting after app starts."""
+        def do_greet():
+            time.sleep(3)  # Brief delay after startup
+            if self.proactive.should_proactive_greet():
+                greeting = self.proactive.get_time_of_day_greeting()
+                logger.info(f"Proactive greeting: {greeting}")
+                self.notifier.show("Yuna", greeting)
+                self.proactive.record_proactive_greeting()
+        threading.Thread(target=do_greet, daemon=True).start()
 
     def _on_shutdown(self):
         """Shutdown callback."""

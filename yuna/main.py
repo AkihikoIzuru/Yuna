@@ -21,11 +21,11 @@ logger = logging.getLogger(__name__)
 
 
 async def text_mode():
-    """Mode teks interaktif (REPL)."""
+    """Mode teks interaktif (REPL) dengan streaming."""
     print("=" * 60)
     print("yuna - Asisten AI Rumah")
     print("=" * 60)
-    print("Mode: Teks")
+    print("Mode: Teks (Streaming)")
     print("Ketik 'exit' atau 'quit' untuk keluar")
     print("=" * 60)
     print()
@@ -62,20 +62,23 @@ async def text_mode():
                 print("\nSampai jumpa!")
                 break
 
-            # Get response from agent
+            # Get streaming response from agent
             print("yuna: ", end="", flush=True)
 
-            response = await agent.run(user_input, history=history)
-            print(response)
+            full_response = ""
+            async for chunk in agent.run_stream(user_input, history=history):
+                full_response += chunk
+                print(chunk, end="", flush=True)
+            print()
             print()
 
             # Save to DB
             conversation_history.add_message("user", user_input)
-            conversation_history.add_message("assistant", response)
+            conversation_history.add_message("assistant", full_response)
 
             # Update in-memory history
             history.append({"role": "user", "content": user_input})
-            history.append({"role": "assistant", "content": response})
+            history.append({"role": "assistant", "content": full_response})
 
             # Keep history limited (last 20 messages)
             if len(history) > 20:
@@ -191,7 +194,7 @@ def main():
 
     # Import tools untuk auto-register
     try:
-        from yuna.tools import system, memory, home
+        from yuna.tools import system, memory, home, vision
         logger.info("Tools loaded successfully")
     except Exception as e:
         logger.error(f"Gagal load tools: {e}")
