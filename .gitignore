@@ -28,3 +28,30 @@ logs/
 
 # Audio cache
 audio_cache/
+
+# Build & Distribution
+build/
+dist/
+*.egg-info/
+*.spec
+
+# Data & Database
+*.db
+*.sqlite
+*.sqlite3
+data/
+%APPDATA%\Yuna/
+
+# Models
+models/
+*.bin
+*.onnx
+
+# Trash
+_trash/
+
+# README guard (pre-commit hook)
+README_*
+*README*.bak
+**/README*
+!/README.md

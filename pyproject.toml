@@ -1,8 +1,8 @@
 [project]
-name = "jarvis"
+name = "yuna"
 version = "0.1.0"
-description = "Asisten AI rumah modular ala JARVIS"
-readme = "readme.md"
+description = "Yuna - Your Unified Network Assistant (Project Hearth)"
+readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "openai>=1.30.0",

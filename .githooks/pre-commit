@@ -1,0 +1,23 @@
+#!/bin/sh
+# Hanya README.md di root yang boleh di-commit; tolak file rahasia.
+
+staged=$(git diff --cached --name-only --diff-filter=ACMR)
+
+# Cek README tambahan (bukan README.md di root)
+stray=$(echo "$staged" | grep -iE '(^|/)readme[^/]*$' | grep -vx 'README.md')
+if [ -n "$stray" ]; then
+  echo "DITOLAK: README tambahan tidak boleh di-commit:"
+  echo "$stray"
+  echo "Hapus file itu atau gabungkan isinya ke README.md di root."
+  exit 1
+fi
+
+# Cek file yang mungkin berisi secret
+secret=$(echo "$staged" | grep -E '(^|/)\.env$|\.pem$|\.key$|credentials')
+if [ -n "$secret" ]; then
+  echo "DITOLAK: file yang mungkin berisi secret:"
+  echo "$secret"
+  exit 1
+fi
+
+exit 0
