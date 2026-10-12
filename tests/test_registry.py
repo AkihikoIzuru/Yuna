@@ -1,7 +1,7 @@
 """Tests untuk tool registry."""
 
 import pytest
-from jarvis.tools.registry import ToolRegistry, tool, get_registry
+from yuna.tools.registry import ToolRegistry, tool, get_registry
 
 
 def test_basic_tool_registration():
@@ -94,3 +94,35 @@ def test_tool_execution_error():
 
     with pytest.raises(ValueError, match="tidak ditemukan"):
         registry.call("nonexistent_tool", {})
+
+
+def test_tool_execution_ignores_extra_kwargs():
+    """Test bahwa tool call mengabaikan argumen tambahan yang tidak di signature (seperti 'reason')."""
+    registry = ToolRegistry()
+
+    @tool(risk="low")
+    def get_date() -> str:
+        """Get current date."""
+        return "2026-10-12"
+
+    registry.register(get_date)
+
+    # Simulate model adding extra 'reason' arg
+    result = registry.call("get_date", {"reason": "user asked for date"})
+    assert result == "2026-10-12"
+
+
+def test_openai_tools_additional_properties_false():
+    """Test bahwa JSON schema memiliki additionalProperties: false."""
+    registry = ToolRegistry()
+
+    @tool(risk="low")
+    def sample_tool(text: str) -> str:
+        """Sample tool."""
+        return text
+
+    registry.register(sample_tool)
+    tools = registry.get_openai_tools()
+    tool_def = next(t for t in tools if t["function"]["name"] == "sample_tool")
+
+    assert tool_def["function"]["parameters"].get("additionalProperties") is False

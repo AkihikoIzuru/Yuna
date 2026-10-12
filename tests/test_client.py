@@ -2,13 +2,13 @@
 
 import pytest
 from unittest.mock import AsyncMock, Mock, patch
-from jarvis.brain.client import RouterClient, ModelResponse
+from yuna.brain.client import RouterClient, ModelResponse
 
 
 @pytest.fixture
 def mock_async_openai():
     """Mock AsyncOpenAI class and its methods."""
-    with patch("jarvis.brain.client.AsyncOpenAI") as mock_class:
+    with patch("yuna.brain.client.AsyncOpenAI") as mock_class:
         mock_instance = Mock()
         mock_instance.chat.completions.create = AsyncMock()
         mock_class.return_value = mock_instance
@@ -20,12 +20,12 @@ def test_client_init():
     c = RouterClient(
         base_url="http://localhost:20128/v1",
         api_key="sk-test",
-        model="jarvis",
-        fast_model="jarvis-fast",
+        model="yuna",
+        fast_model="yuna-fast",
     )
     assert c.base_url == "http://localhost:20128/v1"
-    assert c.model == "jarvis"
-    assert c.fast_model == "jarvis-fast"
+    assert c.model == "yuna"
+    assert c.fast_model == "yuna-fast"
     assert c.api_key == "sk-test"
 
 
@@ -47,7 +47,7 @@ async def test_chat_success(mock_async_openai):
     mock_choice.message.tool_calls = None
     mock_choice.finish_reason = "stop"
     mock_response.choices = [mock_choice]
-    mock_response.model = "jarvis"
+    mock_response.model = "yuna"
     mock_response.usage = Mock()
     mock_response.usage.model_dump.return_value = {"total_tokens": 10}
 
@@ -88,7 +88,7 @@ async def test_chat_with_tool_calls(mock_async_openai):
     mock_choice.message.tool_calls = [mock_tool_call]
     mock_choice.finish_reason = "tool_calls"
     mock_response.choices = [mock_choice]
-    mock_response.model = "jarvis"
+    mock_response.model = "yuna"
     mock_response.usage = None
 
     mock_async_openai.chat.completions.create = AsyncMock(return_value=mock_response)
