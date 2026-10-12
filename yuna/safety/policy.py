@@ -88,11 +88,13 @@ class SafetyPolicy:
             "ha_turn_on_light", "ha_turn_off_light", "ha_toggle_light",
             "ha_set_temperature", "remember_fact", "forget_fact",
             "add_reminder", "delete_reminder", "trigger_alert",
+            "write_file", "delete_file", "create_project", "list_files", "read_file",
         ]
 
         # High risk - butuh konfirmasi eksplisit "ya, lanjutkan"
         high_risk_tools = [
             "acknowledge_alert",  # mengubah state alert
+            "run_python", "run_shell",
         ]
 
         for name in low_risk_tools:

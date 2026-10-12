@@ -200,6 +200,13 @@ def main():
         logger.error(f"Gagal load tools: {e}")
         sys.exit(1)
 
+    # Import sandbox tools separately to avoid circular import
+    try:
+        from yuna.sandbox import tools as sandbox_tools
+        logger.info("Sandbox tools loaded successfully")
+    except Exception as e:
+        logger.warning(f"Failed to load sandbox tools: {e}")
+
     # Register cleanup handler
     atexit.register(close_db)
 

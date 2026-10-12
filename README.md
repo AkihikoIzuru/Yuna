@@ -64,8 +64,8 @@ Yuna *terasa* hidup karena: persona orisinal, memori jangka panjang, sapaan proa
 | 6 | Dashboard (Web UI) | ✅ | FastAPI + WS, orb visualizer, transcript real-time |
 | 7 | Desktop App + Tray | ✅ | pywebview, pystray, single instance, hotkey, notif |
 | 8 | Polishing | ✅ | Health check, logging rotation, PyInstaller packaging |
-| 9 | Terasa Hidup | 🔧 | Streaming LLM+TTS, proaktif, avatar ekspresif, vision |
-| 10 | Yuna Hidup di PC | 🔜 | Sandbox coding, jurnal, path-jail, otonomi terbatas |
+| 9 | Terasa Hidup | ✅ | Streaming LLM+TTS, proaktif, avatar ekspresif, vision |
+| 10 | Yuna Hidup di PC | 🔧 | Sandbox coding, jurnal, path-jail, otonomi terbatas |
 
 > ✅ = jalan & teruji · 🔧 = dikerjakan · 🔜 = rencana
 
@@ -345,7 +345,7 @@ from yuna.tools import system, memory, home, web  # baru
 - [x] Fase 6: Dashboard Web UI
 - [x] Fase 7: Desktop App + System Tray
 - [x] Fase 8: Polishing (health check, logging, PyInstaller packaging)
-- [ ] Fase 9: Terasa Hidup (streaming, proaktif, avatar ekspresif, vision)
+- [x] Fase 9: Terasa Hidup (streaming, proaktif, avatar ekspresif, vision)
 - [ ] Fase 10: Yuna Hidup di PC (sandbox coding, jurnal, otonomi terbatas)
 
 ---
