@@ -113,6 +113,46 @@ async def voice_mode(mode: str = "wake", test_wake: bool = False):
         sys.exit(1)
 
 
+async def tts_mode():
+    """Mode Text-to-Speech: ketik teks, Yuna mengucapkannya."""
+    print("=" * 60)
+    print("yuna - Text-to-Speech Mode")
+    print("=" * 60)
+    print("Ketik teks, Yuna akan mengucapkannya.")
+    print("Ketik 'exit' atau 'quit' untuk keluar")
+    print("=" * 60)
+    print()
+
+    config = get_config()
+    from yuna.voice.tts import get_tts
+
+    tts = get_tts(voice=config.tts_voice, rate=config.tts_rate, pitch=config.tts_pitch)
+    print(f"Voice: {config.tts_voice}, Rate: {config.tts_rate}, Pitch: {config.tts_pitch}")
+    print()
+
+    while True:
+        try:
+            user_input = input("Teks: ").strip()
+
+            if not user_input:
+                continue
+
+            if user_input.lower() in ("exit", "quit", "keluar"):
+                print("\nSampai jumpa!")
+                break
+
+            print("🔊 Mengucapkan...")
+            await tts.speak_stream_and_play(user_input)
+            print("Selesai.\n")
+
+        except (KeyboardInterrupt, EOFError):
+            print("\n\nSampai jumpa!")
+            break
+        except Exception as e:
+            logger.error(f"TTS Error: {e}", exc_info=True)
+            print(f"\nError: {e}\n")
+
+
 def list_audio_devices():
     """List audio devices yang tersedia."""
     try:
@@ -170,6 +210,11 @@ def main():
         action="store_true",
         help="Start minimized to tray (for auto-start)",
     )
+    parser.add_argument(
+        "--tts",
+        action="store_true",
+        help="Mode Text-to-Speech: ketik teks, Yuna mengucapkannya",
+    )
 
     args = parser.parse_args()
 
@@ -222,6 +267,9 @@ def main():
     elif args.ptt:
         # Push-to-talk only
         asyncio.run(voice_mode(mode="push", test_wake=False))
+    elif args.tts:
+        # Text-to-Speech mode
+        asyncio.run(tts_mode())
     elif args.minimized:
         # App mode (desktop app with tray)
         from yuna.app import get_lifecycle
