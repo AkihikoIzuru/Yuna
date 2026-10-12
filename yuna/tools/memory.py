@@ -144,3 +144,11 @@ def delete_reminder(reminder_id: int) -> str:
         return f"Reminder #{reminder_id} dihapus"
     return f"Reminder #{reminder_id} tidak ditemukan"
 
+
+@tool(risk="medium")
+def forget_all_facts() -> str:
+    """Hapus SEMUA fakta user (butuh konfirmasi)."""
+    facts = get_user_facts()
+    deleted = facts.clear_all()
+    return f"Semua fakta dihapus ({deleted} item)"
+

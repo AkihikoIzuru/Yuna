@@ -65,3 +65,12 @@ class UserFacts:
         rows = cursor.fetchall()
         return {row["key"]: row["value"] for row in rows}
 
+    def clear_all(self) -> int:
+        """Hapus semua fakta."""
+        cursor = self.db.cursor()
+        cursor.execute("DELETE FROM facts")
+        self.db.commit()
+        deleted = cursor.rowcount
+        logger.info(f"Cleared all facts: {deleted} items")
+        return deleted
+
