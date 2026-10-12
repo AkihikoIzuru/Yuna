@@ -1,4 +1,4 @@
-﻿"""Main voice loop: wake â†’ rekam â†’ STT â†’ agent â†’ TTS + barge-in."""
+"""Main voice loop: wake â†’ rekam â†’ STT â†’ agent â†’ TTS + barge-in."""
 
 import asyncio
 import logging

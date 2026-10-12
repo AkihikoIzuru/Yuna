@@ -118,6 +118,14 @@ class WhisperWakeBackend(WakeWordBackend):
         if b in a or a in b:
             return 0.8
 
+        # Normalize: remove spaces for comparison
+        a_no_space = a.replace(" ", "")
+        b_no_space = b.replace(" ", "")
+        if a_no_space == b_no_space:
+            return 0.9
+        if b_no_space in a_no_space or a_no_space in b_no_space:
+            return 0.75
+
         # Word overlap
         words_a = set(a.split())
         words_b = set(b.split())
