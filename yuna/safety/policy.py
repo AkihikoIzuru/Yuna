@@ -122,9 +122,10 @@ class SafetyPolicy:
     def _setup_audit_log(self):
         """Setup audit log file."""
         config = get_config()
-        # Default ke folder data di project root
-        data_dir = Path.cwd() / "data"
-        data_dir.mkdir(exist_ok=True)
+        # Use config data_dir (consistent with other components)
+        data_dir = Path(config.data_dir) if config.data_dir else Path.cwd() / "data"
+        data_dir = data_dir / "logs"
+        data_dir.mkdir(parents=True, exist_ok=True)
         self._audit_log_path = data_dir / "audit.log"
         logger.info(f"Audit log: {self._audit_log_path}")
 

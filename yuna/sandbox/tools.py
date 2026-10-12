@@ -310,8 +310,21 @@ def run_shell(command: str, timeout: int = 30) -> str:
     jail = get_path_jail()
     policy = get_policy()
 
+    # Validate command: length limit, no path traversal
+    if not command or len(command) > 500:
+        return "Command terlalu panjang atau kosong (max 500 karakter)"
+
+    cmd_parts = command.strip().split()
+    if not cmd_parts:
+        return "Command kosong"
+
+    cmd_name = cmd_parts[0]
+    # Prevent path traversal in command name
+    if any(sep in cmd_name for sep in ("/", "\\", "..")):
+        return "Command tidak valid: path traversal terdeteksi"
+
     # Check allowlist
-    if not policy.is_shell_allowed(command.split()[0]):
+    if not policy.is_shell_allowed(cmd_name):
         allowed = ", ".join(sorted(policy._shell_allowlist)) or "kosong"
         return f"Command tidak diizinkan. Allowlist: {allowed}"
 

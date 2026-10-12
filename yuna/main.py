@@ -100,7 +100,8 @@ async def voice_mode(mode: str = "wake", test_wake: bool = False):
     """Mode suara (Fase 2)."""
     try:
         from yuna.voice.loop import run_voice_loop
-        await run_voice_loop(mode=mode, wake_word="hey aki", hotkey="space", test_wake=test_wake)
+        config = get_config()
+        await run_voice_loop(mode=mode, wake_word=config.wake_word, hotkey="space", test_wake=test_wake)
     except ImportError as e:
         logger.error(f"Voice dependencies tidak terinstall: {e}")
         print("\nError: Voice dependencies tidak terinstall.")

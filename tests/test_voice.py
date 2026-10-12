@@ -110,9 +110,9 @@ class TestTTS:
         """Test default voice settings."""
         from yuna.voice.tts import TTS
         tts = TTS()
-        assert tts.voice == "id-ID-ArdiNeural"
-        assert tts.rate == "+5%"
-        assert tts.pitch == "+2Hz"
+        assert tts.voice == "id-ID-GadisNeural"
+        assert tts.rate == "+3%"
+        assert tts.pitch == "+3Hz"
 
     def test_custom_voice(self):
         """Test custom voice settings."""

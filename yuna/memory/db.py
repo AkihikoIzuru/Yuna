@@ -5,12 +5,22 @@ import sqlite3
 from pathlib import Path
 from typing import Optional
 
+from yuna.config import get_config
+
 logger = logging.getLogger(__name__)
 
-# Database path - simpan di folder proyek
-DB_PATH = Path(__file__).parent.parent.parent / "yuna.db"
-
 _db_connection: Optional[sqlite3.Connection] = None
+
+
+def _get_db_path() -> Path:
+    """Get database path from config."""
+    config = get_config()
+    if config.data_dir:
+        data_dir = Path(config.data_dir)
+    else:
+        data_dir = Path(__file__).parent.parent.parent / "data"
+    data_dir.mkdir(parents=True, exist_ok=True)
+    return data_dir / "yuna.db"
 
 
 def get_db() -> sqlite3.Connection:
@@ -18,8 +28,9 @@ def get_db() -> sqlite3.Connection:
     global _db_connection
 
     if _db_connection is None:
-        logger.info(f"Opening database: {DB_PATH}")
-        _db_connection = sqlite3.connect(str(DB_PATH), check_same_thread=False)
+        db_path = _get_db_path()
+        logger.info(f"Opening database: {db_path}")
+        _db_connection = sqlite3.connect(str(db_path), check_same_thread=False)
         _db_connection.row_factory = sqlite3.Row  # Akses kolom by name
         init_db(_db_connection)
 

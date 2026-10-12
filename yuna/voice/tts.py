@@ -15,18 +15,18 @@ class TTS:
 
     def __init__(
         self,
-        voice: str = "id-ID-ArdiNeural",
-        rate: str = "+5%",
-        pitch: str = "+2Hz",
+        voice: str = "id-ID-GadisNeural",
+        rate: str = "+3%",
+        pitch: str = "+3Hz",
         volume: str = "+0%",
     ):
         """
         Initialize TTS.
 
         Args:
-            voice: Suara edge-tts (id-ID-ArdiNeural atau id-ID-GadisNeural)
+            voice: Suara edge-tts (default: id-ID-GadisNeural)
             rate: Kecepatan bicara (-50% sampai +50%)
-            pitch: Pitch suara (mis. +2Hz, -5Hz)
+            pitch: Pitch suara (mis. +3Hz, -5Hz)
             volume: Volume suara (-50% sampai +50%)
         """
         self.voice = voice
@@ -153,7 +153,7 @@ class TTS:
             # Cleanup temp file
             try:
                 audio_file.unlink()
-            except:
+            except Exception:
                 pass
 
     async def speak_stream_and_play(self, text: str) -> None:
@@ -178,7 +178,7 @@ class TTS:
 _tts: Optional[TTS] = None
 
 
-def get_tts(voice: str = "id-ID-ArdiNeural", rate: str = "+5%", pitch: str = "+2Hz") -> TTS:
+def get_tts(voice: str = "id-ID-GadisNeural", rate: str = "+3%", pitch: str = "+3Hz") -> TTS:
     """Get global TTS instance."""
     global _tts
     if _tts is None:

@@ -139,7 +139,8 @@ class YunaApp:
     def _run_ui_server(self):
         """Run FastAPI UI server."""
         import uvicorn
-        uvicorn.run(ui_app, host="127.0.0.1", port=8080, log_level="warning")
+        config = get_config()
+        uvicorn.run(ui_app, host=config.ui_host, port=config.ui_port, log_level="warning")
 
     def _run_voice_loop(self):
         """Run voice loop."""

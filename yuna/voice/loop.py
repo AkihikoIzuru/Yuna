@@ -49,7 +49,7 @@ class VoiceLoop:
         sample_rate: int = 16000,
         chunk_duration: float = 0.5,  # detik
         silence_duration: float = 1.5,  # detik untuk deteksi akhir bicara
-        wake_word: str = "hey aki",
+        wake_word: str = None,
         hotkey: str = "space",
         test_wake: bool = False,
     ):
@@ -61,7 +61,7 @@ class VoiceLoop:
             sample_rate: Sample rate audio (16000 Hz recommended)
             chunk_duration: Durasi per chunk audio
             silence_duration: Durasi silence untuk deteksi akhir bicara
-            wake_word: Wake word phrase
+            wake_word: Wake word phrase (default from config)
             hotkey: Hotkey untuk push-to-talk
             test_wake: Test mode - print detected text and scores without processing
         """
@@ -69,12 +69,12 @@ class VoiceLoop:
         self.sample_rate = sample_rate
         self.chunk_size = int(sample_rate * chunk_duration)
         self.silence_chunks = int(silence_duration / chunk_duration)
-        self.wake_word = wake_word
         self.hotkey = hotkey
         self.test_wake = test_wake
 
         # Load config for TTS and wake settings
         config = get_config()
+        self.wake_word = wake_word or config.wake_word
         self.tts_voice = config.tts_voice
         self.tts_rate = config.tts_rate
         self.tts_pitch = config.tts_pitch
@@ -380,13 +380,13 @@ class VoiceLoop:
             self.push_to_talk.stop()
 
 
-async def run_voice_loop(mode: str = "push", wake_word: str = "hey aki", hotkey: str = "space", test_wake: bool = False):
+async def run_voice_loop(mode: str = "push", wake_word: str = None, hotkey: str = "space", test_wake: bool = False):
     """
     Run voice loop.
 
     Args:
         mode: "wake" atau "push"
-        wake_word: Wake word phrase
+        wake_word: Wake word phrase (default from config)
         hotkey: Hotkey untuk push-to-talk
         test_wake: Test mode - print detected text and scores without processing
     """

@@ -28,7 +28,7 @@ class ProactiveEngine:
         current = now.hour + now.minute / 60
         # Quiet hours span midnight (e.g. 22:00-07:00)
         if self.quiet_start > self.quiet_end:
-            return current >= self.quiet_start or current <= self.quiet_end
+            return current >= self.quiet_start or current < self.quiet_end
         return self.quiet_start <= current <= self.quiet_end
 
     def _cooldown_expired(self) -> bool:

@@ -201,7 +201,7 @@ class HomeAssistantClient:
         try:
             result = await self._request("GET", "/")
             return "error" not in result
-        except:
+        except Exception:
             return False
 
 
